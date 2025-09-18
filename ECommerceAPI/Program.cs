@@ -1,3 +1,4 @@
+using Algolia.Search.Clients;
 using ECommerceAPI.Data;
 using ECommerceAPI.Repositories;
 using ECommerceAPI.Services;
@@ -14,16 +15,19 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddScoped<UserRepository>();
 builder.Services.AddScoped<OrderRepository>();
-// builder.Services.AddScoped<CartRepository>();
+builder.Services.AddScoped<CartRepository>();
 builder.Services.AddScoped<ProductRepository>();
 builder.Services.AddScoped<OrderDetailRepository>();
 builder.Services.AddScoped<AuthService>();
 
+// Or for search-only client:
+// services.AddSingleton<ISearchClient>(new SearchClient("YourApplicationID", "YourSearchOnlyAPIKey"));
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<OrderService>();
-// builder.Services.AddScoped<CartService>();
+builder.Services.AddScoped<CartSerivce>();
 builder.Services.AddScoped<ProductService>();
+builder.Services.AddScoped<AlgoliaSyncService>();
 
 builder.Services.AddDbContext<ECommerceDbContext>(options =>
 {

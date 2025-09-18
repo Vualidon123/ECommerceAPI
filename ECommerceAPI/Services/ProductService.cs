@@ -23,9 +23,8 @@ namespace ECommerceAPI.Services
             await _productRepository.AddProductAsync(product);
         }
         public async Task UpdateProductAsync(Product product)
-        {
-            var existingProduct = await _productRepository.GetProductByIdAsync(product.id);
-            await _productRepository.UpdateProductAsync(existingProduct);
+        { 
+            await _productRepository.UpdateProductAsync(product);
         }
         public async Task DeleteProductAsync(int id)
         {

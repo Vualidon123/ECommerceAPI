@@ -7,28 +7,41 @@ namespace ECommerceAPI.Repositories
     public class OrderRepository
     {
         private readonly ECommerceDbContext _context;
-        public OrderRepository(ECommerceDbContext context) {
+        public OrderRepository(ECommerceDbContext context)
+        {
             _context = context;
         }
-        public async Task<IEnumerable<Order>> GetAllOrdersAsync() {
-            return await _context.Orders.ToListAsync();
+        public async Task<IEnumerable<Order>> GetAllOrdersAsync()
+        {
+            return await _context.Orders.AsNoTracking().ToListAsync();
         }
-        public async Task<Order?> GetOrderByIdAsync(int id) {
-            return await _context.Orders.FindAsync(id);
+        public async Task<Order?> GetOrderByIdAsync(int id)
+        {
+            return await _context.Orders.AsNoTracking().FirstOrDefaultAsync(o => o.id == id);
         }
-        public async Task AddOrderAsync(Order order) {
-            _context.Orders.Add(order);
-            _context.SaveChanges();
+        public async Task AddOrderAsync(Order order)
+        {
+            await _context.Orders.AddAsync(order);
+            await _context.SaveChangesAsync();
         }
-        public async Task UpdateOrderAsync(Order order) {
-            _context.Orders.Update(order);
-            _context.SaveChanges();
+        public async Task UpdateOrderAsync(Order order)
+        {
+            var tracked = _context.ChangeTracker.Entries<Order>()
+                .FirstOrDefault(e => e.Entity.id == order.id);
+            if (tracked != null) {
+                _context.Entry(tracked.Entity).State = EntityState.Detached;
+            }
+
+            _context.Entry(order).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
         }
-        public async Task DeleteOrderAsync(int id) {
+        public async Task DeleteOrderAsync(int id)
+        {
             var order = await _context.Orders.FindAsync(id);
-            if (order != null) {
+            if (order != null)
+            {
                 _context.Orders.Remove(order);
-                _context.SaveChanges();
+                await _context.SaveChangesAsync();
             }
         }
     }

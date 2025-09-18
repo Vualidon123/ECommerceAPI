@@ -11,7 +11,7 @@ namespace ECommerceAPI.Models
         public decimal totalAmount { get; set; } // Total amount for the order
         [JsonIgnore]
         public virtual User? User { get; set; } // Navigation property to the user who placed the order
-        [JsonIgnore]
+        
         public virtual List<OrderDetails>? OrderDetails { get; set; } // Navigation property to the order details
     }
 

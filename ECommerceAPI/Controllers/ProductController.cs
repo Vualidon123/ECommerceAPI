@@ -16,7 +16,7 @@ namespace ECommerceAPI.Controllers
             _logger = logger;
             _productService = productService;
         }
-        [Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "Admin")]
         [HttpGet]   
         public async Task<IActionResult> GetAllProducts()
         {
@@ -44,14 +44,14 @@ namespace ECommerceAPI.Controllers
             return CreatedAtAction(nameof(GetProductById), new { id = product.id }, product);
         }
         [HttpPut]
-        public async Task<IActionResult> UpdateProduct(int id,[FromBody] Models.Product product)
+        public async Task<IActionResult> UpdateProduct([FromBody] Models.Product product)
         {
             
             if (ModelState.IsValid == false)
             {
                 return BadRequest(ModelState);
             }
-            var existingProduct = await _productService.GetProductByIdAsync(id);
+            var existingProduct = await _productService.GetProductByIdAsync(product.id);
             if (existingProduct == null)
             {
                 return NotFound();

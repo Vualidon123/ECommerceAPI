@@ -7,10 +7,12 @@ namespace ECommerceAPI.Services
     {
         private readonly OrderRepository _orderRepository;
         private readonly OrderDetailRepository _orderDetailRepository;
-        public OrderService(OrderRepository orderRepository, OrderDetailRepository orderDetailRepository)
+        private readonly ProductRepository _productRepository;
+        public OrderService(OrderRepository orderRepository, OrderDetailRepository orderDetailRepository, ProductRepository productRepository)
         {
             _orderRepository = orderRepository;
             _orderDetailRepository = orderDetailRepository;
+            _productRepository = productRepository;
         }
 
         public async Task<IEnumerable<Order>> GetAllOrdersAsync()
@@ -24,19 +26,48 @@ namespace ECommerceAPI.Services
 
         public async Task AddOrderAsync(Order order)
         {
-            await _orderRepository.AddOrderAsync(order);
-            foreach (var detail in order.OrderDetails)
+            if (order == null) throw new ArgumentNullException(nameof(order));
+
+            // Ensure server controls identity columns
+            order.id = 0;
+
+            order.totalAmount = 0;
+
+            if (order.OrderDetails != null && order.OrderDetails.Count > 0)
             {
-                detail.id = order.id; // Ensure the OrderId is set
-                await _orderDetailRepository.UpdateOrderDetailAsync(detail);
+                foreach (var detail in order.OrderDetails)
+                {
+                    // Ensure server controls identity columns
+                    detail.id = 0;
+
+                    var product = await _productRepository.GetProductByIdAsync(detail.productId);
+                    if (product == null) throw new InvalidOperationException($"Product {detail.productId} not found.");
+                    order.totalAmount += product.price;
+                }
+            }
+
+            await _orderRepository.AddOrderAsync(order);
+
+            if (order.OrderDetails != null && order.OrderDetails.Count > 0)
+            {
+                foreach (var detail in order.OrderDetails)
+                {
+                    // Set FK after order is saved so it has a generated id
+                    detail.orderId = order.id;
+                    await _orderDetailRepository.AddOrderDetailAsync(detail);
+                }
             }
         }
         public async Task UpdateOrderAsync(Order order)
         {
             await _orderRepository.UpdateOrderAsync(order);
-            foreach (var detail in order.OrderDetails)
+            if (order.OrderDetails != null && order.OrderDetails.Count > 0)
             {
-                await _orderDetailRepository.UpdateOrderDetailAsync(detail);
+                foreach (var detail in order.OrderDetails)
+                {
+                    detail.orderId = order.id;
+                    await _orderDetailRepository.UpdateOrderDetailAsync(detail);
+                }
             }
         }
     }
