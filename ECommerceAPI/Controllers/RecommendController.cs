@@ -1,5 +1,6 @@
 ﻿using Algolia.Search.Clients;
 using Algolia.Search.Models.Recommend;
+using ECommerceAPI.Models;
 using ECommerceAPI.Services;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
@@ -21,74 +22,68 @@ public class RecommendationController : ControllerBase
         _algoliaSyncService = algoliaSyncService;
     }
 
-    [HttpGet("similar/{productId}")]
-    public async Task<IActionResult> GetSimilarProducts(int productId)
+  
+
+[HttpGet("similar/{productId}")]
+public async Task<IActionResult> GetSimilarProducts(int productId)
+{
+    try
     {
-        try
+        // Step 1: Verify the product exists in our database
+        var product = await _productService.GetProductByIdAsync(productId);
+        if (product == null)
         {
-            // Step 1: Verify the product exists in our database
-            var product = await _productService.GetProductByIdAsync(productId);
-            if (product == null)
+            return NotFound($"Product with ID {productId} not found in database.");
+        }
+
+        // Step 2: Make the Algolia recommendation request
+        var response = await _recommendClient.GetRecommendationsAsync(
+            new GetRecommendationsParams
             {
-                return NotFound($"Product with ID {productId} not found in database.");
-            }
-
-            Console.WriteLine($"Looking for similar products to: {product.name} (ID: {product.id}, Category: {product.category})");
-
-            // Step 2: Make the Algolia recommendation request
-            var response = await _recommendClient.GetRecommendationsAsync(
-                new GetRecommendationsParams
+                Requests = new List<RecommendationsRequest>
                 {
-                    Requests = new List<RecommendationsRequest>
-                    {
-                        new RecommendationsRequest(
-                            new RelatedQuery
-                            {
-                                IndexName = "products",
-                                ObjectID = product.id.ToString(),
-                                Model = RelatedModel.RelatedProducts,
-                                Threshold = 10.0, // Lower threshold for more results
-                                MaxRecommendations = 5,
-                                QueryParameters = new RecommendSearchParams
-                                {
-                                    // Remove category filter to get more diverse results
-                                    // Filters = $"category:\"{product.category}\""
-                                }
-                            }
-                        ),
-                    },
-                }
-            );
-
-            var results = response.Results.First();
-            
-            // Step 3: Log the response for debugging
-            Console.WriteLine($"Algolia Response: {JsonSerializer.Serialize(results, new JsonSerializerOptions { WriteIndented = true })}");
-            
-            // Step 4: Check if we got any hits
-            if (results.Hits == null || !results.Hits.Any())
-            {
-                return Ok(new List<object>()); // Return empty list instead of debug object
+                    new RecommendationsRequest(
+                        new RelatedQuery
+                        {
+                            IndexName = "products",
+                            ObjectID = product.id.ToString(),
+                            Model = RelatedModel.RelatedProducts,
+                            Threshold = 10.0,
+                            MaxRecommendations = 5
+                        }
+                    ),
+                },
             }
+        );
 
-            // Step 5: Return only the hits (similar products)
-            return Ok(results.Hits);
-        }
-        catch (Exception ex)
+        var results = response.Results.First();
+
+        // Step 3: Map hits to Product list
+        var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+
+        var similarProducts = results.Hits
+            .Select(hit =>
+            {
+                string json = JsonSerializer.Serialize(hit); // hit → JSON
+                return JsonSerializer.Deserialize<Product>(json, options); // JSON → Product
+            })
+            .Where(p => p != null)
+            .ToList();
+
+        if (!similarProducts.Any())
         {
-            Console.WriteLine($"Error in GetSimilarProducts: {ex.Message}");
-            Console.WriteLine($"Stack Trace: {ex.StackTrace}");
-            
-            return StatusCode(500, new 
-            { 
-                error = "Internal server error", 
-                message = ex.Message,
-                productId = productId
-            });
+            return Ok(new { message = "No similar products found" });
         }
-    }
 
-    [HttpGet("debug/products")]
+        return Ok(similarProducts);
+    }
+    catch (Exception ex)
+    {
+        return StatusCode(500, new { error = ex.Message });
+    }
+}
+
+[HttpGet("debug/products")]
     public async Task<IActionResult> GetDebugProducts()
     {
         try

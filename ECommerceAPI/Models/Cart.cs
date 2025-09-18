@@ -11,8 +11,6 @@ namespace ECommerceAPI.Models
         // Navigation properties (optional, depending on your ORM setup)
         [JsonIgnore]
         public virtual User? User { get; set; } // Navigation property to the User
-
-        
         public virtual List<CartItem>? CartItems { get; set; } // Items inside the cart
     }
 }

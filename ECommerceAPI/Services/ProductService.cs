@@ -30,5 +30,22 @@ namespace ECommerceAPI.Services
         {
             await _productRepository.DeleteProductAsync(id);
         }
+        public async Task<List<Product>> SearchProduct(string input)
+        {
+            if (string.IsNullOrWhiteSpace(input))
+            {
+                return new List<Product>();
+            }
+
+            // Run queries sequentially and combine results
+            var byName = await _productRepository.GetProductByNameAsync(input);
+            if (byName.Any())
+            {
+                return byName;
+            }
+
+            var byCategory = await _productRepository.GetProductsByCategoryAsync(input);
+            return byCategory;
+        }
     }
 }

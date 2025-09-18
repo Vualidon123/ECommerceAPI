@@ -28,14 +28,18 @@ builder.Services.AddScoped<OrderService>();
 builder.Services.AddScoped<CartSerivce>();
 builder.Services.AddScoped<ProductService>();
 builder.Services.AddScoped<AlgoliaSyncService>();
+builder.Services.AddScoped<ChatLogRepository>();
+builder.Services.AddScoped<IChatbotService, GeminiChatbotService>();
+
+
+//Thirdparty services
+builder.Services.AddSignalR();
+builder.Services.AddHttpClient<IChatbotService, GeminiChatbotService>();
 
 builder.Services.AddDbContext<ECommerceDbContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
-
-
-
 builder.Services.AddAuthentication("Bearer")
     .AddJwtBearer("Bearer", options =>
     {
@@ -71,7 +75,7 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
-
+app.MapHub<ChatHub>("/chatHub");
 app.MapControllers();
 
 app.Run();

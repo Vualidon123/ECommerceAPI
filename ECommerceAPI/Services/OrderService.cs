@@ -39,10 +39,10 @@ namespace ECommerceAPI.Services
                 {
                     // Ensure server controls identity columns
                     detail.id = 0;
-
                     var product = await _productRepository.GetProductByIdAsync(detail.productId);
                     if (product == null) throw new InvalidOperationException($"Product {detail.productId} not found.");
-                    order.totalAmount += product.price;
+                    product.stock -= detail.quantity;
+                    order.totalAmount += (product.price*detail.quantity);
                 }
             }
 

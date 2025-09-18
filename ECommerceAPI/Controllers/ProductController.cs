@@ -59,5 +59,26 @@ namespace ECommerceAPI.Controllers
             await _productService.UpdateProductAsync(product);
             return Ok();
         }
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteProduct(int id)
+        {
+            var existingProduct = await _productService.GetProductByIdAsync(id);
+            if (existingProduct == null)
+            {
+                return NotFound();
+            }
+            await _productService.DeleteProductAsync(id);
+            return Ok();
+        }
+        [HttpGet("input")]
+        public async Task<IActionResult> SearchProducts(string input)
+        {
+            var products = await _productService.SearchProduct(input);
+            if (products == null || products.Count == 0)
+            {
+                return NotFound();
+            }
+            return Ok(products);
+        }
     }
 }

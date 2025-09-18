@@ -20,7 +20,18 @@ namespace ECommerceAPI.Repositories
         {
             return await _context.Products.FirstOrDefaultAsync(p => p.id == id);
         }
-
+        public async Task<List<Product>> GetProductByNameAsync(string name)
+        {
+            return await _context.Products.
+                Where(p => p.name.Contains(name)).
+                ToListAsync();
+        }
+        public async Task<List<Product>> GetProductsByCategoryAsync(string category)
+        {
+            return await _context.Products.
+                Where(p => p.category.Contains(category)).
+                ToListAsync();
+        }
         public async Task AddProductAsync(Product product)
         {
             await _context.Products.AddAsync(product);

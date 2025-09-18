@@ -8,7 +8,7 @@ namespace ECommerceAPI.Models
         public int cartId { get; set; } // FK to Cart
         public int productId { get; set; } // FK to Product
         public int quantity { get; set; } // Quantity of the product
-
+        
         [JsonIgnore]
         public virtual Cart? Cart { get; set; }
 

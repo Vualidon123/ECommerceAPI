@@ -9,9 +9,4 @@
         public int stock { get; set; } // Available stock quantity
         public string category { get; set; } // Category of the product (e.g., Electronics, Clothing)
     }
-
-
-
-
-
 }
