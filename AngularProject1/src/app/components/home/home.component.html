@@ -1,0 +1,36 @@
+<div class="home-container">
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-content">
+      <h1>Welcome to ECommerce</h1>
+      <p>Discover amazing products at great prices</p>
+      <button class="btn btn-primary" routerLink="/products">Shop Now</button>
+    </div>
+  </section>
+
+  <!-- Featured Products Section -->
+  <section class="featured-products">
+    <div class="container">
+      <h2>Featured Products</h2>
+      <div class="products-grid" *ngIf="!loading">
+        <div class="product-card" *ngFor="let product of featuredProducts" routerLink="/products/{{product.id}}">
+          <div class="product-image">
+            <img [src]="'https://via.placeholder.com/300x200?text=' + product.name" [alt]="product.name">
+          </div>
+          <div class="product-info">
+            <h3>{{ product.name }}</h3>
+            <p class="product-description">{{ product.description }}</p>
+            <div class="product-price">${{ product.price | number:'1.2-2' }}</div>
+            <div class="product-stock" [class.low-stock]="product.stock && product.stock < 10">
+              Stock: {{ product.stock || 0 }}
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="loading" *ngIf="loading">
+        <div class="spinner"></div>
+        <p>Loading products...</p>
+      </div>
+    </div>
+  </section>
+</div>

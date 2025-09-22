@@ -11,7 +11,7 @@ public class GeminiChatbotService : IChatbotService
     private readonly HttpClient _httpClient;
     private readonly ChatLogRepository _chatLogRepository;
     private readonly ProductService _productService;
-    private readonly string _apiKey = "YOUR_GEMINI_API_KEY";
+    private readonly string _apiKey = "AIzaSyCrii-etsVL-coPXrXz6LEfLUtnPnz-Cks";
     private readonly string _model = "gemini-1.5-flash";
 
     public GeminiChatbotService(HttpClient httpClient, ChatLogRepository chatLogRepository, ProductService productService)
@@ -23,20 +23,15 @@ public class GeminiChatbotService : IChatbotService
 
     public async Task<string> GetAnswerAsync(string message, int userId)
     {
-        // 1. Thử extract product
-        var product = await ExtractProductFromMessageAsync(message);
+        // 1. Lấy dữ liệu sản phẩm từ DB
+        var products = await _productService.GetAllProductsAsync();
 
-        if (product != null)
-        {
-            var reply = $"Sản phẩm **{product.name}** có giá {product.price:N0} VND, " +
-                        $"còn {product.stock} sản phẩm trong kho. " +
-                        $"Mô tả: {product.description}";
+        // Ghép danh sách sản phẩm thành text
+        var productContext = string.Join("\n", products.Select(p =>
+            $"{p.name} - Giá: {p.price:N0} VND - Kho: {p.stock} - Mô tả: {p.description}"
+        ));
 
-            await SaveChatLog(userId, message, reply);
-            return reply;
-        }
-
-        // 2. Nếu không thấy -> gọi Gemini
+        // 2. Gửi lên Gemini API
         var url = $"https://generativelanguage.googleapis.com/v1beta/models/{_model}:generateContent?key={_apiKey}";
 
         var requestBody = new
@@ -50,9 +45,12 @@ public class GeminiChatbotService : IChatbotService
                 role = "system",
                 parts = new[]
                 {
-                new { text = "Bạn là chatbot hỗ trợ khách hàng cho hệ thống thương mại điện tử Smart E-commerce. " +
-                             "Chỉ trả lời về sản phẩm, đơn hàng, thanh toán, tài khoản và chính sách. " +
-                             "Nếu không có dữ liệu trong hệ thống, hãy trả lời: 'Xin lỗi, hiện tại tôi chưa có thông tin này.'" }
+                new { text =
+                    "Bạn là chatbot hỗ trợ khách hàng cho hệ thống thương mại điện tử Smart E-commerce. " +
+                    "Dữ liệu sản phẩm hiện có trong kho:\n" + productContext + "\n\n" +
+                    "Chỉ trả lời dựa trên dữ liệu này. " +
+                    "Nếu không tìm thấy thông tin, hãy trả lời: 'Xin lỗi, hiện tại tôi chưa có thông tin này.'"
+                }
             }
             }
         };
@@ -69,6 +67,7 @@ public class GeminiChatbotService : IChatbotService
                          .GetProperty("text")
                          .GetString();
 
+        // 3. Lưu chat log
         await SaveChatLog(userId, message, aiReply);
 
         return aiReply ?? "Xin lỗi, tôi chưa có câu trả lời.";
@@ -76,10 +75,11 @@ public class GeminiChatbotService : IChatbotService
 
 
 
-    public async Task<List<string>> GetChatHistoryAsync(int userId)
+
+    public async Task<List<ChatLog>> GetChatHistoryAsync(int userId)
     {
         var chatLogs = await _chatLogRepository.GetChatLogsByUserIdAsync(userId);
-        return chatLogs.Select(cl => $"User: {cl.UserMessage}\nBot: {cl.BotReply}").ToList();
+        return chatLogs;
     }
 
 
@@ -88,23 +88,5 @@ public class GeminiChatbotService : IChatbotService
        await _chatLogRepository.SaveChatLogAsync(userId, userMessage, botReply);
     }
 
-    private async Task<Product?> ExtractProductFromMessageAsync(string message)
-    {
-        // Chuẩn hoá message
-        var normalizedMessage = message.ToLower().Trim();
-
-        // Lấy tất cả sản phẩm từ DB
-        var products = await _productService.GetAllProductsAsync();
-
-        // Tìm sản phẩm có tên xuất hiện trong message
-        foreach (var product in products)
-        {
-            if (normalizedMessage.Contains(product.name.ToLower()))
-            {
-                return product;
-            }
-        }
-
-        return null;
-    }
+  
 }

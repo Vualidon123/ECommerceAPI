@@ -1,4 +1,5 @@
 ﻿using ECommerceAPI.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -13,6 +14,7 @@ namespace ECommerceAPI.Controllers
         {
             _cartService = cartService;
         }
+        [Authorize(Roles = "User")]
         [HttpGet("{userId}")]
         public async Task<IActionResult> GetCartByUserId(int userId)
         {
@@ -23,6 +25,7 @@ namespace ECommerceAPI.Controllers
             }
             return Ok(cart);
         }
+        [Authorize]
         [HttpPost]
         public async Task<IActionResult> AddCart([FromBody] Models.Cart cart)
         {
@@ -43,6 +46,7 @@ namespace ECommerceAPI.Controllers
             await _cartService.AddCartAsync(cart);
             return CreatedAtAction(nameof(GetCartByUserId), new { userId = cart.userId }, cart);
         }
+        [Authorize]
         [HttpPut]
         public async Task<IActionResult> UpdateCart([FromBody] Models.Cart cart)
         {
@@ -58,6 +62,7 @@ namespace ECommerceAPI.Controllers
             await _cartService.UpdateCartAsync(cart);
             return Ok();
         }
+        [Authorize]
         [HttpDelete("{cartId}")]
         public async Task<IActionResult> DeleteCart(int cartId)
         {

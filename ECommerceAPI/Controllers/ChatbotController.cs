@@ -1,4 +1,5 @@
 ﻿using ECommerceAPI.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 [ApiController]
@@ -12,13 +13,14 @@ public class ChatbotController : ControllerBase
     {
         _chatbotService = chatbotService;
     }
-
+    [Authorize]
     [HttpPost("ask")]
     public async Task<IActionResult> Ask([FromBody] ChatRequest request)
     {
         var answer = await _chatbotService.GetAnswerAsync(request.Message, request.UserId);
         return Ok(new { reply = answer });
     }
+    [Authorize]
     [HttpGet("{id}")]
     public async Task<IActionResult> GetChatByUserId(int id)
     {

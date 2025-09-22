@@ -1,5 +1,6 @@
 ﻿using ECommerceAPI.Models;
 using ECommerceAPI.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -14,13 +15,14 @@ namespace ECommerceAPI.Controllers
         {
             _orderService = orderService;
         }
-
+        [Authorize(Roles = "Admin")]
         [HttpGet]
         public async Task<IActionResult> GetAllOrders()
         {
             var orders = await _orderService.GetAllOrdersAsync();
             return Ok(orders);
         }
+        [Authorize]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetOrderById(int id)
         {
@@ -31,12 +33,14 @@ namespace ECommerceAPI.Controllers
             }
             return Ok(order);
         }
+        [Authorize]
         [HttpPost]
         public async Task<IActionResult> CreateOrder([FromBody] Order order)
         {
             await _orderService.AddOrderAsync(order);
             return CreatedAtAction(nameof(GetOrderById), new { id = order.id }, order);
         }
+        [Authorize]
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateOrder(int id, [FromBody] Models.Order order)
         {

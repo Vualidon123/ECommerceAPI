@@ -12,6 +12,15 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAngular",
+        policy => policy.WithOrigins("http://localhost:53695", "https://localhost:53695")
+                        .AllowAnyHeader()
+                        .AllowAnyMethod()
+                        .AllowCredentials());
+});
+
 
 builder.Services.AddScoped<UserRepository>();
 builder.Services.AddScoped<OrderRepository>();
@@ -72,6 +81,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseCors("AllowAngular");
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();

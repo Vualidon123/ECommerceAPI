@@ -1,0 +1,58 @@
+<div class="product-detail-container" *ngIf="!loading && product">
+  <div class="container">
+    <button (click)="goBack()" class="back-btn">← Back to Products</button>
+    
+    <div class="product-detail">
+      <div class="product-image">
+        <img [src]="'https://via.placeholder.com/500x400?text=' + product.name" [alt]="product.name">
+      </div>
+      
+      <div class="product-info">
+        <h1>{{ product.name }}</h1>
+        <div class="product-category">{{ product.category || 'Uncategorized' }}</div>
+        <p class="product-description">{{ product.description }}</p>
+        
+        <div class="product-price">${{ product.price | number:'1.2-2' }}</div>
+        
+        <div class="product-stock" [class.low-stock]="product.stock && product.stock < 10">
+          Stock: {{ product.stock || 0 }}
+        </div>
+        
+        <div class="quantity-section" *ngIf="product.stock && product.stock > 0">
+          <label for="quantity">Quantity:</label>
+          <div class="quantity-controls">
+            <button (click)="decrementQuantity()" class="quantity-btn">-</button>
+            <input 
+              type="number" 
+              id="quantity"
+              [(ngModel)]="quantity" 
+              min="1" 
+              [max]="product.stock || 1"
+              class="quantity-input">
+            <button (click)="incrementQuantity()" class="quantity-btn">+</button>
+          </div>
+        </div>
+        
+        <div class="product-actions">
+          <button 
+            (click)="addToCart()" 
+            class="btn btn-primary"
+            [disabled]="!product.stock || product.stock === 0">
+            {{ (!product.stock || product.stock === 0) ? 'Out of Stock' : 'Add to Cart' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="loading" *ngIf="loading">
+  <div class="spinner"></div>
+  <p>Loading product...</p>
+</div>
+
+<div class="error" *ngIf="!loading && !product">
+  <h2>Product not found</h2>
+  <p>The product you're looking for doesn't exist.</p>
+  <button (click)="goBack()" class="btn btn-primary">Back to Products</button>
+</div>

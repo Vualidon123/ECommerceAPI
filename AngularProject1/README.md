@@ -1,59 +1,207 @@
-# AngularProject1
+# ECommerce Angular Frontend
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 20.3.2.
+A modern, responsive Angular frontend application for the ECommerce API. This application provides a complete e-commerce experience with product browsing, user authentication, shopping cart functionality, and more.
 
-## Development server
+## Features
 
-To start a local development server, run:
+- **Product Management**: Browse, search, and view product details
+- **User Authentication**: Login and registration functionality
+- **Shopping Cart**: Add, remove, and manage cart items
+- **Responsive Design**: Mobile-first design that works on all devices
+- **Modern UI**: Clean, professional interface with smooth animations
+- **API Integration**: Full integration with the ECommerce API backend
 
-```bash
-ng serve
+## Prerequisites
+
+- Node.js (version 18 or higher)
+- npm (version 8 or higher)
+- Angular CLI (version 20 or higher)
+- ECommerce API backend running
+
+## Installation
+
+1. Navigate to the project directory:
+   ```bash
+   cd AngularProject1
+   ```
+
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+3. Configure the API URL in `src/environments/environment.ts`:
+   ```typescript
+   export const environment = {
+     production: false,
+     apiUrl: 'https://localhost:7000/api' // Update this to match your API URL
+   };
+   ```
+
+## Running the Application
+
+1. Start the development server:
+   ```bash
+   npm start
+   ```
+
+2. Open your browser and navigate to `http://localhost:4200`
+
+3. The application will automatically reload when you make changes to the source files.
+
+## Project Structure
+
+```
+src/
+├── app/
+│   ├── components/           # Angular components
+│   │   ├── auth/            # Authentication components
+│   │   │   ├── login/       # Login component
+│   │   │   └── register/    # Registration component
+│   │   ├── cart/            # Shopping cart component
+│   │   ├── header/          # Navigation header
+│   │   ├── home/            # Home page component
+│   │   ├── product-detail/  # Product detail page
+│   │   └── product-list/    # Product listing page
+│   ├── models/              # TypeScript interfaces
+│   │   ├── cart.model.ts
+│   │   ├── order.model.ts
+│   │   ├── product.model.ts
+│   │   └── user.model.ts
+│   ├── services/            # Angular services
+│   │   ├── api.service.ts   # Main API service
+│   │   ├── auth.service.ts  # Authentication service
+│   │   ├── cart.service.ts  # Cart management service
+│   │   └── product.service.ts # Product service
+│   ├── app-module.ts        # Main app module
+│   ├── app-routing-module.ts # Routing configuration
+│   ├── app.html             # Main app template
+│   ├── app.css              # Main app styles
+│   └── app.ts               # Main app component
+├── environments/            # Environment configurations
+│   ├── environment.ts       # Development environment
+│   └── environment.prod.ts  # Production environment
+└── styles.css              # Global styles
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+## API Integration
 
-## Code scaffolding
+The application integrates with the following API endpoints:
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+### Products
+- `GET /api/Product` - Get all products
+- `GET /api/Product/{id}` - Get product by ID
+- `GET /api/Product/input?input={searchTerm}` - Search products
+- `POST /api/Product` - Add new product (Admin only)
+- `PUT /api/Product` - Update product (Admin only)
+- `DELETE /api/Product/{id}` - Delete product (Admin only)
 
-```bash
-ng generate component component-name
-```
+### Authentication
+- `POST /api/Auth/login` - User login
+- `POST /api/Auth/Register` - User registration
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+### Cart
+- `GET /api/Cart/{userId}` - Get user's cart
+- `POST /api/Cart` - Add/update cart
+- `PUT /api/Cart` - Update cart
+- `DELETE /api/Cart/{cartId}` - Delete cart
 
-```bash
-ng generate --help
-```
+### Orders
+- `GET /api/Order` - Get all orders
+- `GET /api/Order/{id}` - Get order by ID
+- `POST /api/Order` - Create new order
+- `PUT /api/Order/{id}` - Update order
 
-## Building
+## Key Features
 
-To build the project run:
+### Product Browsing
+- View all available products
+- Search products by name or description
+- Filter products by category
+- View detailed product information
+- Add products to cart
 
-```bash
-ng build
-```
+### User Authentication
+- User registration with validation
+- Secure login functionality
+- Session management with JWT tokens
+- Protected routes for authenticated users
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+### Shopping Cart
+- Add/remove items from cart
+- Update item quantities
+- View cart total and item count
+- Persistent cart across sessions
 
-## Running unit tests
+### Responsive Design
+- Mobile-first approach
+- Responsive grid layouts
+- Touch-friendly interface
+- Optimized for all screen sizes
 
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
+## Development
 
-```bash
-ng test
-```
+### Adding New Components
+1. Generate a new component:
+   ```bash
+   ng generate component components/your-component-name
+   ```
 
-## Running end-to-end tests
+2. Add the component to the appropriate module
+3. Update routing if needed
 
-For end-to-end (e2e) testing, run:
+### Adding New Services
+1. Generate a new service:
+   ```bash
+   ng generate service services/your-service-name
+   ```
 
-```bash
-ng e2e
-```
+2. Implement the service logic
+3. Inject the service where needed
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+### Styling
+- Global styles are in `src/styles.css`
+- Component-specific styles are in each component's CSS file
+- Uses CSS Grid and Flexbox for layouts
+- Responsive design with mobile-first approach
 
-## Additional Resources
+## Building for Production
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+1. Build the application:
+   ```bash
+   npm run build
+   ```
+
+2. The build artifacts will be stored in the `dist/` directory
+
+3. Update the production API URL in `src/environments/environment.prod.ts`
+
+## Troubleshooting
+
+### Common Issues
+
+1. **API Connection Issues**
+   - Verify the API URL in environment files
+   - Ensure the backend API is running
+   - Check CORS settings on the backend
+
+2. **Authentication Issues**
+   - Verify JWT token handling
+   - Check localStorage for stored tokens
+   - Ensure proper error handling
+
+3. **Build Issues**
+   - Clear node_modules and reinstall: `rm -rf node_modules && npm install`
+   - Update Angular CLI: `npm install -g @angular/cli@latest`
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Test thoroughly
+5. Submit a pull request
+
+## License
+
+This project is licensed under the MIT License.

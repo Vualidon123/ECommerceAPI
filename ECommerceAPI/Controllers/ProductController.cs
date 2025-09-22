@@ -16,7 +16,7 @@ namespace ECommerceAPI.Controllers
             _logger = logger;
             _productService = productService;
         }
-        //[Authorize(Roles = "Admin")]
+        [Authorize]
         [HttpGet]   
         public async Task<IActionResult> GetAllProducts()
         {
@@ -33,6 +33,7 @@ namespace ECommerceAPI.Controllers
             }
             return Ok(product);
         }
+        [Authorize(Roles = "Admin,Seller")]
         [HttpPost]
         public async Task<IActionResult> AddProduct([FromBody] Models.Product product)
         {
@@ -43,6 +44,7 @@ namespace ECommerceAPI.Controllers
             await _productService.AddProductAsync(product);
             return CreatedAtAction(nameof(GetProductById), new { id = product.id }, product);
         }
+        [Authorize(Roles = "Admin,Seller")]
         [HttpPut]
         public async Task<IActionResult> UpdateProduct([FromBody] Models.Product product)
         {
@@ -59,6 +61,7 @@ namespace ECommerceAPI.Controllers
             await _productService.UpdateProductAsync(product);
             return Ok();
         }
+        [Authorize(Roles = "Admin,Seller")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteProduct(int id)
         {
@@ -70,6 +73,7 @@ namespace ECommerceAPI.Controllers
             await _productService.DeleteProductAsync(id);
             return Ok();
         }
+        
         [HttpGet("input")]
         public async Task<IActionResult> SearchProducts(string input)
         {

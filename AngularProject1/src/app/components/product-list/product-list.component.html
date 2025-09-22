@@ -1,0 +1,73 @@
+<div class="product-list-container">
+  <div class="container">
+    <h1>Products</h1>
+    
+    <!-- Search and Filter Section -->
+    <div class="search-filter-section">
+      <div class="search-box">
+        <input 
+          type="text" 
+          [(ngModel)]="searchTerm" 
+          (input)="searchProducts()"
+          placeholder="Search products..."
+          class="search-input">
+        <button (click)="searchProducts()" class="search-btn">Search</button>
+      </div>
+      
+      <div class="filter-section">
+        <select 
+          [(ngModel)]="selectedCategory" 
+          (change)="filterByCategory()"
+          class="category-filter">
+          <option value="">All Categories</option>
+          <option *ngFor="let category of getCategories()" [value]="category">
+            {{ category }}
+          </option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Products Grid -->
+    <div class="products-grid" *ngIf="!loading">
+      <div class="product-card" *ngFor="let product of filteredProducts">
+        <div class="product-image">
+          <img [src]="'https://via.placeholder.com/300x200?text=' + product.name" [alt]="product.name">
+        </div>
+        <div class="product-info">
+          <h3>{{ product.name }}</h3>
+          <p class="product-description">{{ product.description }}</p>
+          <div class="product-category">{{ product.category || 'Uncategorized' }}</div>
+          <div class="product-price">${{ product.price | number:'1.2-2' }}</div>
+          <div class="product-stock" [class.low-stock]="product.stock && product.stock < 10">
+            Stock: {{ product.stock || 0 }}
+          </div>
+          <div class="product-actions">
+            <button 
+              (click)="addToCart(product)" 
+              class="btn btn-primary"
+              [disabled]="!product.stock || product.stock === 0">
+              {{ (!product.stock || product.stock === 0) ? 'Out of Stock' : 'Add to Cart' }}
+            </button>
+            <button 
+              routerLink="/products/{{product.id}}" 
+              class="btn btn-outline">
+              View Details
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    <div class="loading" *ngIf="loading">
+      <div class="spinner"></div>
+      <p>Loading products...</p>
+    </div>
+
+    <!-- No Products Found -->
+    <div class="no-products" *ngIf="!loading && filteredProducts.length === 0">
+      <h3>No products found</h3>
+      <p>Try adjusting your search or filter criteria.</p>
+    </div>
+  </div>
+</div>
